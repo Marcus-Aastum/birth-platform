@@ -1,18 +1,55 @@
 ﻿@page "/counter"
+@using System.Security.Claims
+@using BirthPlatform.Data
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<BirthContext> _contextFactory;
+@attribute [Authorize]
 
-<PageTitle>Counter</PageTitle>
+<PageTitle>User Claims</PageTitle>
 
-<h1>Counter</h1>
+<h1>User Claims</h1>
 
-<p role="status">Current count: @currentCount</p>
-
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+@if (claims.Any())
+{
+    <ul>
+        @foreach (var claim in claims)
+        {
+            <li><b>@claim.Type:</b> @claim.Value</li>
+        }
+    </ul>
+}
 
 @code {
-    private int currentCount = 0;
+    private List<Claim> claims = [];
 
-    private void IncrementCount()
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthState { get; set; }
+
+    protected override async Task OnInitializedAsync()
     {
-        currentCount++;
+        if (AuthState == null)
+        {
+            return;
+        }
+
+        var authState = await AuthState;
+        claims = authState.User.Claims.ToList();
+        using (var _context = _contextFactory.CreateDbContext())
+        {
+            foreach (var claim in claims)
+            {
+                if (claim.Type == "helseid://claims/hpr/hpr_number" && _context.Doctors.Where((d) => d.HPRNumber == claim.Value).Count() == 0)
+                {
+                    _context.Doctors.Add(new Doctor { HPRNumber = claim.Value });
+                    _context.SaveChanges();
+                }
+            }
+
+            foreach (var doctor in _context.Doctors)
+            {
+                claims.Add(new Claim("hpr", doctor.HPRNumber));
+            }
+        }
     }
 }
