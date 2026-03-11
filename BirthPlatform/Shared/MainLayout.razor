@@ -1,8 +1,14 @@
 ﻿@inherits LayoutComponentBase
 
-<PageTitle>BirthPlatform</PageTitle>
+<PageTitle>Fødselsplattformen</PageTitle>
 
 <div class="page">
+    <MudThemeProvider Theme="BirthPLatformTheme" />
+    <MudPopoverProvider />
+
+    <MudDialogProvider />
+
+    <MudSnackbarProvider />
     <div class="sidebar">
         <NavMenu />
     </div>
@@ -17,3 +23,21 @@
         </article>
     </main>
 </div>
+@code{
+    MudTheme BirthPLatformTheme = new MudTheme()
+    {
+        PaletteLight = new PaletteLight()
+        {
+            Primary = "#015945",
+            Secondary = "#00467A"
+        },
+        Typography = new Typography()
+        {
+            Default = new DefaultTypography()
+            {
+                FontFamily = new[] { "Arial", "sans-serif" }
+            }
+        }
+    };
+
+}

@@ -1,0 +1,60 @@
+﻿@page "/create-child"
+@using System.ComponentModel.DataAnnotations
+@using BirthPlatform.Data
+@using Microsoft.EntityFrameworkCore
+@attribute [Authorize(Policy = "Healthcare")]
+@inject IDbContextFactory<BirthContext> _contextFactory
+@inject ISnackbar Snackbar
+<h3>Opprett barn</h3>
+
+<EditForm Model="@child" OnValidSubmit="OnValidSubmit">
+    <MudGrid>
+        <MudItem xs="12" sm="7" >
+            <MudPaper Class="pa-4">
+                <MudTextField @bind-Value="child.Name" T="string" Label="Navn" Required="true" RequiredError="Navn er påkrevd!" />
+                <MudNumericField @bind-Value="child.BirthMother" T="string" Label="Fødemor" Required="true" RequiredError="Fødemor er påkrevd!" />
+                <MudDatePicker @bind-Date="_birthdate" Label="Fødselsdato" Required="true" RequiredError="Fødselsdato er påkrevd!" />
+                <MudSelect T="string" Label="Allergier" MultiSelection="true" @bind-SelectedValues="_allergies">
+                    @foreach (var allergy in allowedAllergies)
+                    {
+                        <MudSelectItem T="string" Value="@allergy">@allergy</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudPaper>
+            <MudPaper Class="pa-4 mt-4">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit" DropShadow="false">Send inn</MudButton>
+            </MudPaper>
+        </MudItem>
+    </MudGrid>
+</EditForm>
+
+@code {
+    private Child child = new Child(){Name = null, BirthDate = DateOnly.MaxValue, BirthMother = null};
+    private IReadOnlyCollection<string> _allergies = [];
+
+    private DateTime? _birthdate = DateTime.Today;
+
+    private IEnumerable<string> allowedAllergies = [
+    "Gluten", "Pollen", "Melk", "Pencilin", "Nøtter"
+    ];
+
+    private void OnValidSubmit(EditContext context)
+    {
+        using (var dbcontext = _contextFactory.CreateDbContext())
+        {
+            try
+            {
+                child.Id = new Guid();
+                child.Allergies = _allergies.ToArray();
+                child.BirthDate = DateOnly.Parse(_birthdate!.Value.ToShortDateString());
+                dbcontext.Children.Add(child);
+                dbcontext.SaveChanges();
+                Snackbar.Add("Barn opprettt", Severity.Success);
+            }
+            catch
+            {
+                Snackbar.Add("En feil oppsto, prøv igjen", Severity.Warning);
+            }
+        }
+    }
+}

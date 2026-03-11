@@ -14,14 +14,13 @@ public class BirthContext : DbContext
 
     public DbSet<Child> Children { get; set; }
     public DbSet<Booking> Bookings { get; set; }
-    public DbSet<Doctor> Doctors { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Child>()
-            .HasOne(a => a.Booking)
-            .WithOne(a => a.Child)
-            .HasForeignKey<Booking>(c => c.ChildId);
+        //modelBuilder.Entity<Child>()
+        //    .HasOne(a => a.Booking)
+        //    .WithOne(a => a.Child)
+        //    .HasForeignKey<Booking>(c => c.ChildId);
     }
 }
 
@@ -44,16 +43,10 @@ public class Booking
 {
     public Guid Id { get; set; }
     public required Guid ChildId { get; set; }
-    public required Child Child { get; set;  }
+    //public required Child Child { get; set;  }
     public required DateTime Time { get; set; }
     public required string Location { get; set; }
-    public Doctor? Doctor { get; set; }
+    public string? DoctorHPR { get; set; }
     public bool IsCompleted { get; set; }
 }
 
-[PrimaryKey(nameof(HPRNumber))]
-public class Doctor
-{
-    public required string HPRNumber;
-    public ICollection<Booking> Bookings = [];
-}

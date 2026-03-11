@@ -112,6 +112,7 @@ public class OidcEvents(IConfiguration configuration) : OpenIdConnectEvents
 
         // Construct the state parameter and add it to the protocol message so that we can include it in the pushed authorization request
         redirectContext.Properties.Items.Add(OpenIdConnectDefaults.RedirectUriForCodePropertiesKey, redirectContext.ProtocolMessage.RedirectUri);
+        redirectContext.Properties.Items.Add("test_security_level", "4");
         redirectContext.ProtocolMessage.State = redirectContext.Options.StateDataFormat.Protect(redirectContext.Properties);
 
         // The client assertion is required for HelseID to authenticate the client

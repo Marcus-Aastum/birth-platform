@@ -9,6 +9,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using MudBlazor;
+using MudBlazor.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 const string HELSEIDSCHEME = "helseid";
@@ -18,7 +20,20 @@ builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
 builder.Services.AddDbContextFactory<BirthContext>(options =>
-    options.UseInMemoryDatabase("birthDatabase"));
+    options.UseSqlServer(builder.Configuration.GetValue<string>("ConnectionString")));
+
+builder.Services.AddMudServices(config =>
+{
+    config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomLeft;
+    config.SnackbarConfiguration.RequireInteraction = false;
+    config.SnackbarConfiguration.PreventDuplicates = false;
+    config.SnackbarConfiguration.NewestOnTop = false;
+    config.SnackbarConfiguration.ShowCloseIcon = true;
+    config.SnackbarConfiguration.VisibleStateDuration = 5000;
+    config.SnackbarConfiguration.HideTransitionDuration = 200;
+    config.SnackbarConfiguration.ShowTransitionDuration = 200;
+    config.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
+});
 
 builder.Services.AddTransient<OidcEvents>();
 
@@ -40,7 +55,13 @@ builder.Services.AddAuthentication(HELSEIDSCHEME).AddOpenIdConnect(HELSEIDSCHEME
     oidcOptions.SaveTokens = true;
 }).AddCookie(CookieAuthenticationDefaults.AuthenticationScheme);
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Healthcare", p =>
+    {
+        p.RequireClaim("helseid://claims/hpr/hpr_number");
+    });
+});
 
 var app = builder.Build();
 

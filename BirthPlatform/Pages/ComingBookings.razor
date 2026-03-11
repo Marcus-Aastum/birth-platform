@@ -1,0 +1,74 @@
+﻿@page "/coming-bookings"
+@using BirthPlatform.Data
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<BirthContext> _contextFactory
+@attribute [Authorize]
+
+<MudDataGrid @ref="_bookingGrid" T="ChildBooking" Items="@_bookings"
+             Bordered="true" Dense="true">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Dine timebestillinger</MudText>
+        <MudSpacer />
+
+    </ToolBarContent>
+    <Columns>
+        <PropertyColumn Property="x => x.Name" Title="Navn"/>
+        <PropertyColumn Property="x => x.BirthMother" Title="Fødemor"/>
+        <PropertyColumn Property="x => x.BirthDate" Title="Fødselsdato" />
+        <PropertyColumn Property="x => x.Time" Title="Tidspunkt" />
+        <PropertyColumn Property="x => x.Doctor" Title="Lege" />
+        
+    </Columns>
+</MudDataGrid>
+
+@code {
+    private List<ChildBooking> _bookings = [];
+
+    private MudDataGrid<ChildBooking> _bookingGrid = default!;
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthState { get; set; }
+
+    private bool takeBooking;
+    private TimeSpan? bookingTime;
+    private DateTime? bookingDate = DateTime.Today;
+
+    private IReadOnlyCollection<string> _allergies = [];
+
+    private IEnumerable<string> allowedAllergies = [
+    "Gluten", "Pollen", "Melk", "Pencilin", "Nøtter"
+    ];
+
+    protected override async Task OnInitializedAsync()
+    {
+        using (var dbcontext = _contextFactory.CreateDbContext())
+        {
+            var authState = await AuthState!;
+            var pid = authState.User.Claims.Where(x => x.Type == "helseid://claims/identity/pid").First();
+            var bookings = dbcontext.Bookings.ToList(); 
+            var yourChildren = dbcontext.Children.Where(x => x.BirthMother == pid.Value).ToList();
+            foreach (var child in yourChildren)
+            {
+                var booking = bookings.Where(x => x.ChildId == child.Id);
+                if (booking.Count() == 0)
+                {
+                    continue;
+                }
+                _bookings.Add(new ChildBooking()
+                {
+                    Name = child.Name,
+                    Time = booking.First().Time,
+                    Doctor = booking.First().DoctorHPR!,
+                    BirthMother = child.BirthMother,
+                    BirthDate = child.BirthDate
+                });
+            }
+        }
+    }
+
+    public class ChildBooking : Child
+    {
+        public DateTime Time { get; set; }
+        public required string Doctor { get; set; }
+    }
+}

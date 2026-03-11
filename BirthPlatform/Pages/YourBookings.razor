@@ -1,0 +1,104 @@
+﻿@page "/your-bookings"
+@using BirthPlatform.Data
+@using Microsoft.EntityFrameworkCore
+@inject IDbContextFactory<BirthContext> _contextFactory
+@attribute [Authorize(Policy = "Healthcare")]
+
+<MudDataGrid @ref="_bookingGrid" T="Bookinginfo" Items="@_bookings"
+             Bordered="true" Dense="true">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Dine timebestillinger</MudText>
+        <MudSpacer />
+
+    </ToolBarContent>
+    <Columns>
+        <PropertyColumn Property="x => x.Id" Title="Id" Editable="false" />
+        <PropertyColumn Property="x => x.Child.Name" Title="Navn"/>
+        <PropertyColumn Property="x => x.Child.BirthMother" Title="Fødemor"/>
+        <PropertyColumn Property="x => x.Child.BirthDate" Title="Fødselsdato" />
+        <PropertyColumn Property="x => x.Time" Title="Tidspunkt" />
+        <PropertyColumn Property="x => x.IsCompleted" Title="Gjennomført" />
+        
+        <TemplateColumn CellClass="d-flex justify-between">
+            <CellTemplate>
+                <MudCheckBox Color="Color.Primary" aria-label="Sett som gjennomført" @bind-Value="context.Item.IsCompleted" onclick="@(() => MarkEdited(context.Item))" />
+            </CellTemplate>
+
+        </TemplateColumn>
+    </Columns>
+</MudDataGrid>
+
+@code {
+    private List<Bookinginfo> _bookings = [];
+
+    private MudDataGrid<Bookinginfo> _bookingGrid = default!;
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthState { get; set; }
+
+    private bool takeBooking;
+    private TimeSpan? bookingTime;
+    private DateTime? bookingDate = DateTime.Today;
+
+    private IReadOnlyCollection<string> _allergies = [];
+
+    private IEnumerable<string> allowedAllergies = [
+    "Gluten", "Pollen", "Melk", "Pencilin", "Nøtter"
+    ];
+
+    protected override async Task OnInitializedAsync()
+    {
+        using (var dbcontext = _contextFactory.CreateDbContext())
+        {
+            var authState = await AuthState!;
+            var hprNumber = authState.User.Claims.Where(x => x.Type == "helseid://claims/hpr/hpr_number").First();
+            var bookings = dbcontext.Bookings.Where(x => x.DoctorHPR == hprNumber.Value).ToList(); 
+            var allChildren = dbcontext.Children.ToList();
+            foreach (var booking in bookings)
+            {
+                _bookings.Add(new(allChildren.Where(x => x.Id == booking.ChildId).First())
+                {
+                    Id = booking.Id,
+                    ChildId = booking.ChildId,
+                    Time = booking.Time,
+                    Location = booking.Location,
+                    IsCompleted = booking.IsCompleted,
+                    DoctorHPR = booking.DoctorHPR
+                });
+            }
+        }
+    }
+
+    private void StartEditingItem(Child item)
+    {
+        _allergies = item.Allergies.ToArray();
+    }
+
+    private void MarkEdited(Bookinginfo item)
+    {
+        Console.WriteLine("State is now" + !item.IsCompleted);
+        using (var dbcontext = _contextFactory.CreateDbContext())
+        {
+            var updatedBooking = new Booking
+            {
+                Id = item.Id,
+                ChildId = item.ChildId,
+                Time = item.Time,
+                Location = item.Location,
+                IsCompleted = !item.IsCompleted,
+                DoctorHPR = item.DoctorHPR
+            };
+            dbcontext.Update(updatedBooking);
+            dbcontext.SaveChanges();
+        }
+    }
+
+    public class Bookinginfo : Booking
+    {
+        public Bookinginfo(Child kid)
+        {
+            Child = kid;
+        }
+        public Child Child { get; set; }
+    }
+}
