@@ -16,6 +16,7 @@
         <PropertyColumn Property="x => x.BirthMother" Title="Fødemor"/>
         <PropertyColumn Property="x => x.BirthDate" Title="Fødselsdato" />
         <PropertyColumn Property="x => x.Time" Title="Tidspunkt" />
+        <PropertyColumn Property="x => x.Location" Title="Lokasjon" />
         <PropertyColumn Property="x => x.Doctor" Title="Lege" />
         
     </Columns>
@@ -61,7 +62,8 @@
                     Doctor = booking.First().DoctorHPR!,
                     BirthMother = child.BirthMother,
                     BirthDate = child.BirthDate,
-                    Municipality = child.Municipality
+                    Municipality = child.Municipality,
+                    Location = booking.First().Location
                 });
             }
         }
@@ -71,5 +73,6 @@
     {
         public DateTime Time { get; set; }
         public required string Doctor { get; set; }
+        public required string Location { get; set; }
     }
 }

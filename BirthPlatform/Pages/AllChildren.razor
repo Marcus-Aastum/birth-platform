@@ -50,6 +50,7 @@
                 {
                     <MudTimePicker @bind-Time="bookingTime" Required="true" />
                     <MudDatePicker @bind-Date="bookingDate" Required="true" />
+                    <MudTextField @bind-Value="_location" Required="true" RequiredError="Lokasjon er påkrevd" Label="Lokasjon"/>
                 }
             </EditTemplate>
         </PropertyColumn>
@@ -57,9 +58,6 @@
             <CellTemplate>
                 <MudIconButton aria-label="Rediger barn" Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync" />
             </CellTemplate>
-            <EditTemplate>
-                <MudIconButton aria-label="Rediger barn" Size="@Size.Small" Icon="@Icons.Material.Outlined.Edit" OnClick="@context.Actions.StartEditingItemAsync" />
-            </EditTemplate>
         </TemplateColumn>
     </Columns>
 </MudDataGrid>
@@ -84,6 +82,8 @@
     private IEnumerable<string> allowedConditions = [
     "Diabetes", "Cerebral parese", "Hørselstap", "Blind"
     ];
+
+    private string _location = "";
 
     protected override async Task OnInitializedAsync()
     {
@@ -121,11 +121,10 @@
                 booking = new Booking()
                     {
                         Id = new Guid(),
-                        //Child = item,
                         ChildId = item.Id,
                         DoctorHPR = hprNumber.Value,
                         Time = bookingDate + bookingTime ?? DateTime.Today,
-                        Location = "Trondheim"
+                        Location = _location
                     };
                 dbcontext.Bookings.Add(booking);
                 dbcontext.SaveChanges();
@@ -137,6 +136,7 @@
             dbcontext.SaveChanges();
         }
         takeBooking = false;
+        _location = "";
 
         return DataGridEditFormAction.Close;
     }

@@ -44,7 +44,6 @@ public class Booking
 {
     public Guid Id { get; set; }
     public required Guid ChildId { get; set; }
-    //public required Child Child { get; set;  }
     public required DateTime Time { get; set; }
     public required string Location { get; set; }
     public string? DoctorHPR { get; set; }

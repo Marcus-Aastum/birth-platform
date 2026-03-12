@@ -70,6 +70,7 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Error");
 }
+app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -77,11 +78,48 @@ app.UseAuthorization();
 
 app.UseStaticFiles();
 
-app.UseRouting();
 
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
 
 app.MapGroup("/authentication").MapLoginAndLogout();
+
+app.MapGet("/api/children", () =>
+{
+    IEnumerable<Child> children = [];
+    // Setter opp databasetilkoblingen
+    var dbFactory = app.Services.GetService(typeof(IDbContextFactory<BirthContext>));
+
+    if (dbFactory != null && dbFactory is IDbContextFactory<BirthContext>)
+    {
+        var dbFactoryConfirmed = dbFactory as IDbContextFactory<BirthContext>;
+        using (var context = dbFactoryConfirmed!.CreateDbContext())
+        {
+            // Henter ut all barn fra databasen
+            children = context.Children.ToArray();
+        }
+    }
+    // Gir ut alle barn i responsen
+    return children;
+}).RequireAuthorization(["Healthcare"]); // Krever at man er innlogget som helsepersonell
+
+app.MapGet("/api/bookings", () =>
+{
+    IEnumerable<Booking> bookings = [];
+    // Setter opp databasetilkoblingen
+    var dbFactory = app.Services.GetService(typeof(IDbContextFactory<BirthContext>));
+
+    if (dbFactory != null && dbFactory is IDbContextFactory<BirthContext>)
+    {
+        var dbFactoryConfirmed = dbFactory as IDbContextFactory<BirthContext>;
+        using (var context = dbFactoryConfirmed!.CreateDbContext())
+        {
+            // Henter ut alle timebestillinger fra databasen
+            bookings = context.Bookings.ToArray();
+        }
+    }
+    // Gir ut alle timebestillinger i responsen
+    return bookings;
+}).RequireAuthorization(["Healthcare"]); // Krever at man er innlogget som helsepersonell
 
 app.Run();

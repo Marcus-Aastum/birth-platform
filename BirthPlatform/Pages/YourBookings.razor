@@ -12,11 +12,11 @@
 
     </ToolBarContent>
     <Columns>
-        <PropertyColumn Property="x => x.Id" Title="Id" Editable="false" />
         <PropertyColumn Property="x => x.Child.Name" Title="Navn"/>
         <PropertyColumn Property="x => x.Child.BirthMother" Title="Fødemor"/>
         <PropertyColumn Property="x => x.Child.BirthDate" Title="Fødselsdato" />
         <PropertyColumn Property="x => x.Time" Title="Tidspunkt" />
+        <PropertyColumn Property="x => x.Location" Title="Lokasjon" />
         <PropertyColumn Property="x => x.IsCompleted" Title="Gjennomført" />
         
         <TemplateColumn CellClass="d-flex justify-between">
