@@ -8,11 +8,11 @@ To run this project, you will need an MSSQL database set up with an empty databa
 
 1. Setup the required secrets, either as user secrets or ENV-variables
     ```json
-{
-  "PrivateJwt": "your private key from HelseID",
-  "ClientId": "your HelseID ClientId",
-  "ConnectionString": "Connection string to your MSSQL server"
-}
+    {
+      "PrivateJwt": "your private key from HelseID",
+      "ClientId": "your HelseID ClientId",
+      "ConnectionString": "Connection string to your MSSQL server"
+    }
     ```
 2. Run the necessary migrations using `dotnet ef database update`
     1. If you don't have the ef-tool already, install it with `dotnet tool install --global dotnet-ef`
