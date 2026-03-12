@@ -14,10 +14,19 @@
                 <MudTextField @bind-Value="child.Name" T="string" Label="Navn" Required="true" RequiredError="Navn er påkrevd!" />
                 <MudNumericField @bind-Value="child.BirthMother" T="string" Label="Fødemor" Required="true" RequiredError="Fødemor er påkrevd!" />
                 <MudDatePicker @bind-Date="_birthdate" Label="Fødselsdato" Required="true" RequiredError="Fødselsdato er påkrevd!" />
+                <MudTextField @bind-Value="child.Municipality" Label="Kommune" Required="true" RequiredError="Kommune er påkrevd!" />
+                <MudNumericField @bind-Value="child.Weight" T="float?" Label="Vekt (gram)" />
+                <MudNumericField @bind-Value="child.Height" T="float?" Label="Høyde (cm)" />
                 <MudSelect T="string" Label="Allergier" MultiSelection="true" @bind-SelectedValues="_allergies">
                     @foreach (var allergy in allowedAllergies)
                     {
                         <MudSelectItem T="string" Value="@allergy">@allergy</MudSelectItem>
+                    }
+                </MudSelect>
+                <MudSelect T="string" Label="Lidelser" MultiSelection="true" @bind-SelectedValues="_conditions">
+                    @foreach (var condition in allowedConditions)
+                    {
+                        <MudSelectItem T="string" Value="@condition">@condition</MudSelectItem>
                     }
                 </MudSelect>
             </MudPaper>
@@ -29,13 +38,18 @@
 </EditForm>
 
 @code {
-    private Child child = new Child(){Name = null, BirthDate = DateOnly.MaxValue, BirthMother = null};
-    private IReadOnlyCollection<string> _allergies = [];
-
+    private Child child = new Child(){Name = null, BirthDate = DateOnly.MaxValue, BirthMother = null, Municipality = null};
     private DateTime? _birthdate = DateTime.Today;
 
+
+    private IReadOnlyCollection<string> _allergies = [];
     private IEnumerable<string> allowedAllergies = [
     "Gluten", "Pollen", "Melk", "Pencilin", "Nøtter"
+    ];
+
+    private IReadOnlyCollection<string> _conditions = [];
+    private IEnumerable<string> allowedConditions = [
+    "Diabetes", "Cerebral parese", "Hørselstap", "Blind"
     ];
 
     private void OnValidSubmit(EditContext context)
@@ -46,6 +60,7 @@
             {
                 child.Id = new Guid();
                 child.Allergies = _allergies.ToArray();
+                child.Conditions = _conditions.ToArray();
                 child.BirthDate = DateOnly.Parse(_birthdate!.Value.ToShortDateString());
                 dbcontext.Children.Add(child);
                 dbcontext.SaveChanges();

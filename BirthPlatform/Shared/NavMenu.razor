@@ -11,41 +11,50 @@
     <nav class="flex-column">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All" tabindex="0">
-                <span class="oi oi-home" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter" tabindex="0">
-                <span class="oi oi-plus" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="create-child" tabindex="0">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Opprett barn
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="all-children" tabindex="0">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Alle barn
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="your-bookings" tabindex="0">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Dine timebestillinger
+                <span class="oi oi-home" aria-hidden="true"></span> Hjem
             </NavLink>
         </div>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="coming-bookings" tabindex="0">
-                <span class="oi oi-list-rich" aria-hidden="true"></span> Kommende timer
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Kommende timer @if (isHealthcare) {<text>(Privat)</text>}
             </NavLink>
         </div>
+        @if (isHealthcare)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="create-child" tabindex="0">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> Opprett barn
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="all-children" tabindex="0">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> Alle barn
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="your-bookings" tabindex="0">
+                    <span class="oi oi-list-rich" aria-hidden="true"></span> Dine timebestillinger
+                </NavLink>
+            </div>
+        }
     </nav>
 </div>
 
 @code {
     private bool collapseNavMenu = true;
+    private bool isHealthcare;
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthState { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthState!;
+        var hprNumber = authState.User.Claims.Where(x => x.Type == "helseid://claims/hpr/hpr_number").FirstOrDefault();
+        isHealthcare = hprNumber != null;
+    }
 
     private void ToggleNavMenu()
     {

@@ -30,6 +30,7 @@ public class Child
     public Guid Id { get; set; }
     public required string BirthMother { get; set; }
     public required string Name { get; set; }
+    public required string Municipality { get; set; }
     public required DateOnly BirthDate { get; set; }
     public float? Weight { get; set; }
     public float? Height { get; set; }

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BirthPlatform.Migrations
 {
     [DbContext(typeof(BirthContext))]
-    [Migration("20260311122852_InitialCreate")]
+    [Migration("20260312072252_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -78,6 +78,10 @@ namespace BirthPlatform.Migrations
 
                     b.Property<float?>("Height")
                         .HasColumnType("real");
+
+                    b.Property<string>("Municipality")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()

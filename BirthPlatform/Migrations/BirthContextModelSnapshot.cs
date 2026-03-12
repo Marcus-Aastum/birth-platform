@@ -76,6 +76,10 @@ namespace BirthPlatform.Migrations
                     b.Property<float?>("Height")
                         .HasColumnType("real");
 
+                    b.Property<string>("Municipality")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");

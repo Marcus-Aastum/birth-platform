@@ -18,6 +18,7 @@ namespace BirthPlatform.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     BirthMother = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Municipality = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     BirthDate = table.Column<DateOnly>(type: "date", nullable: false),
                     Weight = table.Column<float>(type: "real", nullable: true),
                     Height = table.Column<float>(type: "real", nullable: true),
