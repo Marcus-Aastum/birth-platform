@@ -64,7 +64,7 @@
                 child.BirthDate = DateOnly.Parse(_birthdate!.Value.ToShortDateString());
                 dbcontext.Children.Add(child);
                 dbcontext.SaveChanges();
-                Snackbar.Add("Barn opprettt", Severity.Success);
+                Snackbar.Add("Barn opprettet", Severity.Success);
             }
             catch
             {
